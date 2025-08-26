@@ -39,3 +39,41 @@ export const getMeal = async (req,res) => {
 };
 
 // Update a meal
+export const updateMeal = async (req, res) => {
+    try{
+        const { id } = req.params;
+        const { name, calories, protein, carbs, fat } = req.body;
+
+        const meal = await prisma.meal.findUnique({ where: {id: Number(id) }});
+        if (!meal || meal.userId !== req.user.id) {
+            return res.status(404).json({ error: "Meal not found" });
+        }
+
+        const updated = await prisma.meal.update({
+            where: { id: Number(id) },
+            data: { name, calories, protein, carbs, fat},
+        });
+
+        res.json({ message: "Meal updated", meal: updated});
+    } catch (err){
+        res.status(500).json({error: err.message});
+    }
+};
+
+// Delete a meal
+export const deleteMeal = async (req, res) => {
+    try{
+        const { id } = req.params;
+
+        const meal = await prisma.meal.findUnique({ where: {id: Number(id)}});
+        if (!meal || meal.userId !== req.user.id){
+            return res.status(404).json({error: "Meal not found"});
+        }
+
+        await prisma.meal.delete({ where: { id: Number(id) }});
+
+        res.json({ message: "Meal deleted" });
+    } catch (err){
+        res.status(500).json({error: err.message});
+    }
+};
