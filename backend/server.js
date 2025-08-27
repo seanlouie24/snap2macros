@@ -15,7 +15,26 @@ const prisma = new PrismaClient()
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-app.use(cors());
+const allowedOrigins = [
+    "http://localhost:3000",               // Local dev
+    "https://snap2macros.vercel.app"      // Vercel production
+  ];  
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like Postman) or if origin is in allowedOrigins
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      credentials: true,
+    })
+  );
+  
 app.use(express.json());
 
 // Routes:

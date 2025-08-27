@@ -4,10 +4,10 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const authMiddleware = async(req, res) => {
+export const authMiddleware = async(req, res, next) => {
     try{
         const authHeader = req.headers["authorization"];
-        if(!authHeader || !authHeader.startswith("Bearer ")){
+        if(!authHeader || !authHeader.startsWith("Bearer ")){
             return res.status(401).json({ error: "No token provided" });
         }
 
@@ -15,7 +15,9 @@ export const authMiddleware = async(req, res) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await prisma.user.findUnique({where: {id: decoded.id}});
+        const userId = decoded.id;
+
+        const user = await prisma.user.findUnique({where: {id: userId}});
         if (!user) return res.status(401).json({error: "User not found" });
 
         req.user = user;
