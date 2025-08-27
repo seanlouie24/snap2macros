@@ -1,8 +1,7 @@
 // Login Page
 'use client'
 import { useState } from 'react'
-import api from '@/lib/api'
-import axios from 'axios'
+import supabase from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -21,15 +20,22 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await api.post('/auth/login', { email, password })
-      localStorage.setItem('token', res.data.token)
-      router.push('/dashboard')
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        alert(err.response?.data?.message || 'Login failed')
-      } else {
-        alert('An unexpected error occurred')
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (error) {
+        alert(error.message)
+        return
       }
+
+      localStorage.setItem('token', data.session?.access_token ?? '')
+
+      router.push('/dashboard')
+    } catch (err) {
+      console.error(err)
+      alert('An unexpected error occurred')
     }
   }
 

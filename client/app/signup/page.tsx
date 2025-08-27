@@ -3,10 +3,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import api from '@/lib/api'
-import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import supabase from '@/lib/supabase'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -23,15 +22,17 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await api.post('/auth/signup', { email, password })
-      localStorage.setItem('token', res.data.token)
-      router.push('/dashboard')
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        alert(err.response?.data?.message || 'Signup failed')
-      } else {
-        alert('An unexpected error occurred')
+      const { data, error } = await supabase.auth.signUp({ email, password })
+
+      if (error) {
+        alert(error.message)
+        return
       }
+
+      router.push('/dashboard')
+    } catch (err) {
+      console.error(err)
+      alert('An unexpected error occurred')
     }
   }
 
