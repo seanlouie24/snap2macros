@@ -1,7 +1,8 @@
 // Login Page
 'use client'
 import { useState } from 'react'
-import axios from '@/lib/api'
+import api from '@/lib/api'
+import axios from 'axios'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -10,11 +11,15 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await axios.post('/auth/login', { email, password })
+      const res = await api.post('/auth/login', { email, password })
       localStorage.setItem('token', res.data.token)
       alert('Logged in!')
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Login failed')
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        alert(err.response?.data?.message || 'Login failed')
+      } else {
+        alert('An unexpected error occurred')
+      }
     }
   }
 
