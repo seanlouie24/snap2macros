@@ -41,6 +41,10 @@ export default function LoginPage() {
 
   return (
     <div className='mx-auto max-w-md rounded-xl bg-white p-6 shadow-md'>
+      <h1 className='mb-6 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-center text-5xl font-extrabold text-transparent drop-shadow-lg'>
+        Snap2Macros
+      </h1>
+
       <h1 className='mb-4 text-2xl font-semibold'>Login</h1>
       <form onSubmit={handleLogin} className='flex flex-col gap-4'>
         <input
