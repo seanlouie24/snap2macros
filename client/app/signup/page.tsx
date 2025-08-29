@@ -5,7 +5,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import supabase from '@/lib/supabase'
+import api from '@/lib/api'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -22,17 +22,18 @@ export default function SignupPage() {
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      const res = await api.post('/auth/signup', { email, password })
 
-      if (error) {
-        alert(error.message)
-        return
+      if (res.status === 201 || res.status === 200) {
+        alert('Signup successful!')
+        router.push('/dashboard')
       }
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message || err.message || 'Something went wrong'
 
-      router.push('/dashboard')
-    } catch (err) {
-      console.error(err)
-      alert('An unexpected error occurred')
+      console.error(msg)
+      alert(msg)
     }
   }
 
