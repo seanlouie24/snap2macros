@@ -6,6 +6,6 @@ import { processMealImage } from "../controllers/aiController.js";
 
 const router = express.Router();
 
-router.post("upload", authMiddleware, upload.single("image"), processMealImage);
+router.post("/upload", authMiddleware, upload.single("image"), processMealImage);
 
 export default router;

@@ -1,7 +1,7 @@
 // Login Page
 'use client'
 import { useState } from 'react'
-import api from '@/lib/api'
+import apiPublic from '@/lib/apiPublic'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -20,10 +20,10 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await api.post('/auth/login', { email, password })
+      const res = await apiPublic.post('/auth/login', { email, password })
 
       if (res.data?.token) {
-        localStorage.setItem('token', res.data.token)
+        localStorage.setItem('jwt', res.data.token)
       }
       router.push('/dashboard')
     } catch (err: any) {

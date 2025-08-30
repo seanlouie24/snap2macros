@@ -1,5 +1,5 @@
-import express from "express";
 import dotenv from "dotenv";
+import express from "express";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import path from "path";

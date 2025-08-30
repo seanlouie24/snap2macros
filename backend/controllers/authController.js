@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 
 // Function for signup requesting and responding
 export const signup = async (req, res) => {
+    console.log("Signup payload:", req.body); // log input
     try{
         // Pulling the email and password from db
         const {email, password} = req.body;

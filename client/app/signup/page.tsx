@@ -5,7 +5,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import api from '@/lib/api'
+import apiPublic from '@/lib/apiPublic'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -22,7 +22,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await api.post('/auth/signup', { email, password })
+      const res = await apiPublic.post('/auth/signup', { email, password })
 
       if (res.status === 201 || res.status === 200) {
         alert('Signup successful!')
