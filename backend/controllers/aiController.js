@@ -37,13 +37,18 @@ export const processMealImage = async (req, res) => {
     const visionResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are a food recognition assistant." },
+        { role: "system", content: `
+        You are a food recognition assistant. 
+        Only reply with a **single ingredient line** recognized by the Edamam Nutrition API.
+        Format: <quantity> <unit> <food name>, e.g. "1 large apple", "2 slices pepperoni pizza", "1 cup cooked rice".
+        Do not include any extra explanation, text, or punctuation.
+      ` },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "What food is in this image? Reply with a single dish or ingredient name.",
+              text: "Identify the food in this image and reply ONLY with an Edamam-compatible ingredient line."
             },
             { type: "image_url", image_url: { url: imageUrl } },
           ],
@@ -51,28 +56,33 @@ export const processMealImage = async (req, res) => {
       ],
     });
 
-    const detectedFood = visionResponse.choices[0].message.content.trim();
+    const cleanedFood = visionResponse.choices[0].message.content.trim();
+    const ingredients = [cleanedFood];
 
-    // Fetchs nutrition info from Edamam
-    const nutritionRes = await axios.get("https://api.edamam.com/api/nutrition-data", {
-      params: {
-        app_id: process.env.NUTRITION_APP_ID,
-        app_key: process.env.NUTRITION_API_KEY,
-        ingr: detectedFood,
-      },
-    });
+    const nutritionRes = await axios.post(
+      `https://api.edamam.com/api/nutrition-details?app_id=${process.env.NUTRITION_APP_ID}&app_key=${process.env.NUTRITION_API_KEY}`, // ✅ CHANGED: POST endpoint
+      {
+        title: cleanedFood,
+        ingr: ingredients,  
+      }
+    );
+
+    console.log("Edamam response:", nutritionRes.data); 
+    console.log("Parsed ingredients:", nutritionRes.data.ingredients); 
 
     const nutrition = nutritionRes.data;
 
-    const calories = Math.round(nutrition.calories || 0);
-    const protein = Math.round(nutrition.totalNutrients?.PROCNT?.quantity || 0);
-    const carbs = Math.round(nutrition.totalNutrients?.CHOCDF?.quantity || 0);
-    const fat = Math.round(nutrition.totalNutrients?.FAT?.quantity || 0);
+    const firstParsed = nutrition.ingredients?.[0]?.parsed?.[0]?.nutrients || {};
+
+    const calories = Math.round(nutrition.calories ?? firstParsed.ENERC_KCAL?.quantity ?? 0);
+    const protein = Math.round(nutrition.totalNutrients?.PROCNT?.quantity ?? firstParsed.PROCNT?.quantity ?? 0);
+    const carbs = Math.round(nutrition.totalNutrients?.CHOCDF?.quantity ?? firstParsed.CHOCDF?.quantity ?? 0);
+    const fat = Math.round(nutrition.totalNutrients?.FAT?.quantity ?? firstParsed.FAT?.quantity ?? 0);
 
     // Saves meal in Prisma
     const meal = await prisma.meal.create({
       data: {
-        name: detectedFood,
+        name: cleanedFood, 
         calories,
         protein,
         carbs,
