@@ -28,10 +28,13 @@ export default function SignupPage() {
         alert('Signup successful!')
         router.push('/dashboard')
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const e = err as {
+        response?: { data?: { message?: string } }
+        message?: string
+      }
       const msg =
-        err.response?.data?.message || err.message || 'Something went wrong'
-
+        e.response?.data?.message || e.message || 'Something went wrong'
       console.error(msg)
       alert(msg)
     }

@@ -26,9 +26,12 @@ export default function LoginPage() {
         localStorage.setItem('jwt', res.data.token)
       }
       router.push('/dashboard')
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Login failed'
-
+    } catch (err: unknown) {
+      const e = err as {
+        response?: { data?: { message?: string } }
+        message?: string
+      }
+      const msg = e.response?.data?.message || e.message || 'Login failed'
       console.error(msg)
       alert(msg)
     }

@@ -18,9 +18,15 @@ const Meals = () => {
     try {
       const res = await api.get<Meal[]>('/meals')
       setMeals(res.data.filter(meal => meal.calories > 0))
-    } catch (err: any) {
-      console.error(err)
-      toast.error('Failed to fetch meals')
+    } catch (err: unknown) {
+      const e = err as {
+        response?: { data?: { error?: string } }
+        message?: string
+      }
+      console.error(e)
+      toast.error(
+        e.response?.data?.error || e.message || 'Failed to fetch meals'
+      )
     }
   }
 
@@ -68,9 +74,13 @@ const Meals = () => {
         URL.revokeObjectURL(previewUrl)
         setPreviewUrl(null)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Updated to match backend 'error' field
-      toast.error(err.response?.data?.error || 'AI upload failed')
+      const e = err as {
+        response?: { data?: { error?: string } }
+        message?: string
+      }
+      toast.error(e.response?.data?.error || e.message || 'AI upload failed')
     } finally {
       setLoading(false)
     }
