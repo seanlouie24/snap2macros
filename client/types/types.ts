@@ -12,13 +12,9 @@ export interface Meal {
 }
 
 export interface AiResponse {
-    name: string;
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    imageUrl?: string;
-}
+    message: string
+    meal: Meal
+  }
 
 export interface Goal {
     calories: number;
